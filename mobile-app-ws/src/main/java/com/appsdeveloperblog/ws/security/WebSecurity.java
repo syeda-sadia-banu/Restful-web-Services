@@ -7,6 +7,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 
@@ -15,18 +16,15 @@ import com.appsdeveloperblog.ws.service.UserService;
 @Configuration
 @EnableWebSecurity
 public class WebSecurity {
-	private final UserService userDetailService;
-	private final BCryptPasswordEncoder bCryptPasswordEncoder;
-	
-	
 
-	public WebSecurity(UserService userDetailService, BCryptPasswordEncoder bCryptPasswordEncoder) {
+	private final UserService userDetailsService;
+	private final BCryptPasswordEncoder bCryptPasswordEncoder;
+
+	public WebSecurity(UserService userDetailsService, BCryptPasswordEncoder bCryptPasswordEncoder) {
 		super();
-		this.userDetailService = userDetailService;
+		this.userDetailsService = userDetailsService;
 		this.bCryptPasswordEncoder = bCryptPasswordEncoder;
 	}
-
-
 
 	@Bean
 	protected SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -34,20 +32,29 @@ public class WebSecurity {
 		AuthenticationManagerBuilder authenticationManagerBuilder = http
 				.getSharedObject(AuthenticationManagerBuilder.class);
 
-		// Configure authentication manager with the userDetailsService and password
-		// encoder
-		authenticationManagerBuilder.userDetailsService(userDetailService).passwordEncoder(bCryptPasswordEncoder);
+		authenticationManagerBuilder.userDetailsService(userDetailsService).passwordEncoder(bCryptPasswordEncoder);
 
-		//AuthenticationManager authenticationManager = authenticationManagerBuilder.build(); // Return the
-																							// AuthenticationManager
+		AuthenticationManager authenticationManager = authenticationManagerBuilder.build();
 
-		
+		// customize login url path
+
+		AuthenticationFilter authenticationFilter = new AuthenticationFilter(authenticationManager);
+		authenticationFilter.setFilterProcessesUrl("/users/login");
 
 		http
-
-				.csrf().disable().authorizeRequests()
-				.requestMatchers(HttpMethod.POST, "/users").permitAll().anyRequest()
-				.authenticated();
+		    
+		     .csrf().disable()
+		     .authorizeRequests()
+		     .requestMatchers(HttpMethod.POST, "/users")
+		     .permitAll()
+		     .anyRequest()
+			.authenticated()
+			.and()
+			.authenticationManager(authenticationManager)
+			.addFilter(authenticationFilter)
+			.addFilter(new AuthorizationFilter(authenticationManager))
+			.sessionManagement()
+			.sessionCreationPolicy(SessionCreationPolicy.STATELESS);
 
 		return http.build();
 

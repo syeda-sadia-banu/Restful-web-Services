@@ -16,7 +16,7 @@ import com.appsdeveloperblog.ws.ui.model.request.UserDetailsRequestModel;
 import com.appsdeveloperblog.ws.ui.model.response.UserRest;
 
 @RestController
-@RequestMapping("users")
+@RequestMapping("/users")
 public class UserController {
 
 	@Autowired
