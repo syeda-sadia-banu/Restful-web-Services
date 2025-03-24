@@ -44,6 +44,7 @@ public class WebSecurity {
 		http
 		    
 		     .csrf().disable()
+		     .cors().and()
 		     .authorizeRequests()
 		     .requestMatchers(HttpMethod.POST, "/users")
 		     .permitAll()
