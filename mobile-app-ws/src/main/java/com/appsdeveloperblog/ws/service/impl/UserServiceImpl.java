@@ -15,6 +15,7 @@ import com.appsdeveloperblog.ws.io.entity.UserEntity;
 import com.appsdeveloperblog.ws.service.UserService;
 import com.appsdeveloperblog.ws.shared.Utils;
 import com.appsdeveloperblog.ws.shared.dto.UserDto;
+import com.appsdeveloperblog.ws.ui.model.response.ErrorMessages;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -76,5 +77,22 @@ public class UserServiceImpl implements UserService {
 		BeanUtils.copyProperties(userEntity, returnValue);
 		return returnValue;
 	}
+
+
+	@Override
+	public UserDto updateUser(String id, UserDto user) {
+		UserDto returnValue=new UserDto();
+		UserEntity userEntity=userRepository.findByUserId(id);
+		if(userEntity==null)throw new UsernameNotFoundException(ErrorMessages.NO_RECORD_FOUND.getErrorMessage());
+		userEntity.setFirstName(user.getFirstName());
+		userEntity.setLastName(user.getLastName());
+		
+		UserEntity updatedUser= userRepository.save(userEntity);
+		BeanUtils.copyProperties(updatedUser, returnValue);
+		return returnValue;
+	}
+
+
+	
 
 }
