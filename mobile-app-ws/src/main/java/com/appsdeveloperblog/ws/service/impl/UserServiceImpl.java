@@ -1,9 +1,14 @@
 package com.appsdeveloperblog.ws.service.impl;
 
 import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -49,59 +54,76 @@ public class UserServiceImpl implements UserService {
 		return returnValue;
 	}
 
-
 	@Override
 	public UserDto getUser(String email) {
-		UserEntity userEntity=userRepository.findByEmail(email);
-		if(userEntity==null)throw new UsernameNotFoundException(email);
-		
-		UserDto returnValue=new UserDto();
+		UserEntity userEntity = userRepository.findByEmail(email);
+		if (userEntity == null)
+			throw new UsernameNotFoundException(email);
+
+		UserDto returnValue = new UserDto();
 		BeanUtils.copyProperties(userEntity, returnValue);
 		return returnValue;
 	}
-
 
 	@Override
 	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-		UserEntity userEntity=userRepository.findByEmail(username);
-		if(userEntity==null) throw new UsernameNotFoundException(username);
+		UserEntity userEntity = userRepository.findByEmail(username);
+		if (userEntity == null)
+			throw new UsernameNotFoundException(username);
 		return new User(username, userEntity.getEncryptedPassword(), new ArrayList<>());
 	}
 
-
 	@Override
 	public UserDto getUserById(String userId) {
-		UserDto returnValue=new UserDto();
-		UserEntity userEntity=userRepository.findByUserId(userId);
-		if(userEntity==null) throw new UsernameNotFoundException(userId);
+		UserDto returnValue = new UserDto();
+		UserEntity userEntity = userRepository.findByUserId(userId);
+		if (userEntity == null)
+			throw new UsernameNotFoundException(userId);
 		BeanUtils.copyProperties(userEntity, returnValue);
 		return returnValue;
 	}
 
-
 	@Override
 	public UserDto updateUser(String id, UserDto user) {
-		UserDto returnValue=new UserDto();
-		UserEntity userEntity=userRepository.findByUserId(id);
-		if(userEntity==null)throw new UsernameNotFoundException(ErrorMessages.NO_RECORD_FOUND.getErrorMessage());
+		UserDto returnValue = new UserDto();
+		UserEntity userEntity = userRepository.findByUserId(id);
+		if (userEntity == null)
+			throw new UsernameNotFoundException(ErrorMessages.NO_RECORD_FOUND.getErrorMessage());
 		userEntity.setFirstName(user.getFirstName());
 		userEntity.setLastName(user.getLastName());
-		
-		UserEntity updatedUser= userRepository.save(userEntity);
+
+		UserEntity updatedUser = userRepository.save(userEntity);
 		BeanUtils.copyProperties(updatedUser, returnValue);
 		return returnValue;
 	}
 
-
 	@Override
 	public void deleteUser(String id) {
-		UserEntity userEntity=userRepository.findByUserId(id);
-		if(userEntity==null) throw new UsernameNotFoundException(ErrorMessages.NO_RECORD_FOUND.getErrorMessage());
+		UserEntity userEntity = userRepository.findByUserId(id);
+		if (userEntity == null)
+			throw new UsernameNotFoundException(ErrorMessages.NO_RECORD_FOUND.getErrorMessage());
 		userRepository.delete(userEntity);
-		
+
 	}
 
+	@Override
+	public List<UserDto> getUsers(int page, int limit) {
+		List<UserDto> returnValue = new ArrayList<>();
+		
+		if(page>0) page-=1;
+		Pageable pageableRequest = PageRequest.of(page, limit);
 
-	
+		Page<UserEntity> userpage = userRepository.findAll(pageableRequest);
+		List<UserEntity> users = userpage.getContent();
+		for (UserEntity userEntity : users) {
+			UserDto userDto = new UserDto();
+			BeanUtils.copyProperties(userEntity, userDto);
+			returnValue.add(userDto);
+			
+			
+		}
+
+		return returnValue;
+	}
 
 }
