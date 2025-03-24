@@ -17,6 +17,9 @@ import com.appsdeveloperblog.ws.service.UserService;
 import com.appsdeveloperblog.ws.shared.dto.UserDto;
 import com.appsdeveloperblog.ws.ui.model.request.UserDetailsRequestModel;
 import com.appsdeveloperblog.ws.ui.model.response.ErrorMessages;
+import com.appsdeveloperblog.ws.ui.model.response.OperationStatusModel;
+import com.appsdeveloperblog.ws.ui.model.response.RequestOperationName;
+import com.appsdeveloperblog.ws.ui.model.response.RequestOperationStatus;
 import com.appsdeveloperblog.ws.ui.model.response.UserRest;
 
 @RestController
@@ -74,9 +77,14 @@ public class UserController {
 		
 	}
 
-	@DeleteMapping
-	public String deleteUSer() {
-		return "delete user was called";
+	@DeleteMapping("/{id}")
+	public OperationStatusModel deleteUSer(@PathVariable String id) {
+		OperationStatusModel returnValue=new OperationStatusModel();
+		returnValue.setOperationName(RequestOperationName.DELETE.name());
+		userService.deleteUser(id);
+		returnValue.setOperationResult(RequestOperationStatus.Success.name());
+		
+		return returnValue;
 	}
 
 }
