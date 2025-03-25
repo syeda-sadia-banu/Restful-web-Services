@@ -1,4 +1,4 @@
-package com.appsdeveloperblog.ws;
+package com.appsdeveloperblog.ws.io.repository;
 
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.stereotype.Repository;

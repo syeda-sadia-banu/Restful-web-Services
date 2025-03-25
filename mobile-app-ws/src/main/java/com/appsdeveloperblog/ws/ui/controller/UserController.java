@@ -1,12 +1,15 @@
 package com.appsdeveloperblog.ws.ui.controller;
 
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.modelmapper.ModelMapper;
+import org.modelmapper.TypeToken;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -18,9 +21,12 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.appsdeveloperblog.ws.exception.UserServiceException;
+import com.appsdeveloperblog.ws.service.AddressService;
 import com.appsdeveloperblog.ws.service.UserService;
+import com.appsdeveloperblog.ws.shared.dto.AddressDto;
 import com.appsdeveloperblog.ws.shared.dto.UserDto;
 import com.appsdeveloperblog.ws.ui.model.request.UserDetailsRequestModel;
+import com.appsdeveloperblog.ws.ui.model.response.AddressesRest;
 import com.appsdeveloperblog.ws.ui.model.response.ErrorMessages;
 import com.appsdeveloperblog.ws.ui.model.response.OperationStatusModel;
 import com.appsdeveloperblog.ws.ui.model.response.RequestOperationName;
@@ -33,6 +39,8 @@ public class UserController {
 
 	@Autowired
 	UserService userService;
+	@Autowired
+	AddressService addressService;
 	/*
 	 * @GetMapping public String getUsers() { return "get users was called"; }
 	 */
@@ -43,7 +51,9 @@ public class UserController {
 		UserRest returnValue = new UserRest();
 
 		UserDto userDto = userService.getUserById(id);
-		BeanUtils.copyProperties(userDto, returnValue);
+		// BeanUtils.copyProperties(userDto, returnValue);
+		ModelMapper modelMapper = new ModelMapper();
+		returnValue = modelMapper.map(userDto, UserRest.class);
 		return returnValue;
 
 	}
@@ -62,8 +72,8 @@ public class UserController {
 		UserDto userDto = modelMapper.map(userDetails, UserDto.class);
 
 		UserDto createdUser = userService.createUser(userDto);
-		//BeanUtils.copyProperties(createdUser, returnValue);
-		returnValue= modelMapper.map(createdUser,UserRest.class);
+		// BeanUtils.copyProperties(createdUser, returnValue);
+		returnValue = modelMapper.map(createdUser, UserRest.class);
 
 		return returnValue;
 	}
@@ -106,6 +116,25 @@ public class UserController {
 			returnValue.add(userModel);
 		}
 		return returnValue;
+	}
+	
+	//http://localhost:8080/mobile-app-ws/users/userId/addresses
+	@GetMapping(path = "/{id}/addresses", produces = { MediaType.APPLICATION_XML_VALUE, MediaType.APPLICATION_JSON_VALUE })
+	public List<AddressesRest> getUserAddresses(@PathVariable String id) {
+
+		List<AddressesRest> returnValue = new ArrayList<>();
+
+		List<AddressDto> addressesDto = addressService.getAddresses(id);
+		
+		if(addressesDto!=null && !addressesDto.isEmpty()) {
+		
+		Type listType = new TypeToken<List<AddressesRest>>() {}.getType();
+		ModelMapper modelMapper=new ModelMapper();
+		returnValue= modelMapper.map(addressesDto, listType);
+		
+		}
+		return returnValue;
+
 	}
 
 }

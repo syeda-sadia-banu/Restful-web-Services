@@ -16,8 +16,8 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import com.appsdeveloperblog.ws.UserRepository;
 import com.appsdeveloperblog.ws.io.entity.UserEntity;
+import com.appsdeveloperblog.ws.io.repository.UserRepository;
 import com.appsdeveloperblog.ws.service.UserService;
 import com.appsdeveloperblog.ws.shared.Utils;
 import com.appsdeveloperblog.ws.shared.dto.AddressDto;
