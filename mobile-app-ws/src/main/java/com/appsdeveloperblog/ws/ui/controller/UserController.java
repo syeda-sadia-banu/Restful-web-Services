@@ -117,23 +117,37 @@ public class UserController {
 		}
 		return returnValue;
 	}
-	
-	//http://localhost:8080/mobile-app-ws/users/userId/addresses
-	@GetMapping(path = "/{id}/addresses", produces = { MediaType.APPLICATION_XML_VALUE, MediaType.APPLICATION_JSON_VALUE })
+
+	// http://localhost:8080/mobile-app-ws/users/userId/addresses
+	@GetMapping(path = "/{id}/addresses", produces = { MediaType.APPLICATION_XML_VALUE,
+			MediaType.APPLICATION_JSON_VALUE })
 	public List<AddressesRest> getUserAddresses(@PathVariable String id) {
 
 		List<AddressesRest> returnValue = new ArrayList<>();
 
 		List<AddressDto> addressesDto = addressService.getAddresses(id);
-		
-		if(addressesDto!=null && !addressesDto.isEmpty()) {
-		
-		Type listType = new TypeToken<List<AddressesRest>>() {}.getType();
-		ModelMapper modelMapper=new ModelMapper();
-		returnValue= modelMapper.map(addressesDto, listType);
-		
+
+		if (addressesDto != null && !addressesDto.isEmpty()) {
+
+			Type listType = new TypeToken<List<AddressesRest>>() {
+			}.getType();
+			ModelMapper modelMapper = new ModelMapper();
+			returnValue = modelMapper.map(addressesDto, listType);
+
 		}
 		return returnValue;
+
+	}
+
+	@GetMapping(path = "/{id}/addresses/{addressId}", produces = { MediaType.APPLICATION_XML_VALUE,
+			MediaType.APPLICATION_JSON_VALUE })
+	public AddressesRest getUserAddress(@PathVariable String addressId) {
+
+		AddressDto addressesDto = addressService.getAddress(addressId);
+
+		ModelMapper modelMapper = new ModelMapper();
+
+		return modelMapper.map(addressesDto, AddressesRest.class);
 
 	}
 
