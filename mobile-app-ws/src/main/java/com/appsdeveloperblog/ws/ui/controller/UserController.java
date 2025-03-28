@@ -139,15 +139,21 @@ public class UserController {
 			ModelMapper modelMapper = new ModelMapper();
 			returnValue = modelMapper.map(addressesDto, listType);
 
+			for (AddressesRest addressRest : returnValue) {
+				Link selfLink = WebMvcLinkBuilder.linkTo(
+						WebMvcLinkBuilder.methodOn(UserController.class).getUserAddress(id, addressRest.getAddressId()))
+						.withSelfRel();
+				addressRest.add(selfLink);
+			}
 		}
-		Link userLink=WebMvcLinkBuilder.linkTo(UserController.class)
-                                       .slash(id)
-                                       .withRel("user");
-		Link selfLink=WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(UserController.class).getUserAddresses(id))
-				                       .withSelfRel();		
 
-		return CollectionModel.of(returnValue,userLink,selfLink );
+			Link userLink = WebMvcLinkBuilder.linkTo(UserController.class).slash(id).withRel("user");
+			Link selfLink = WebMvcLinkBuilder
+					.linkTo(WebMvcLinkBuilder.methodOn(UserController.class).getUserAddresses(id)).withSelfRel();
 
+			return CollectionModel.of(returnValue, userLink, selfLink);
+
+		
 	}
 
 	@GetMapping(path = "/{userId}/addresses/{addressId}", produces = { MediaType.APPLICATION_XML_VALUE,
@@ -161,19 +167,14 @@ public class UserController {
 
 		Link userLink = WebMvcLinkBuilder.linkTo(UserController.class).slash(userId).withRel("user");
 		Link userAddressesLink = WebMvcLinkBuilder
-			                          .linkTo(WebMvcLinkBuilder
-			                          .methodOn(UserController.class)
-			                          .getUserAddresses(userId))
-				                     // .slash(userId)
-				                     // .slash("addresses")
-				                       .withRel("addresses");
-		
-		
+				.linkTo(WebMvcLinkBuilder.methodOn(UserController.class).getUserAddresses(userId))
+				// .slash(userId)
+				// .slash("addresses")
+				.withRel("addresses");
+
 		Link selfLink = WebMvcLinkBuilder
-				        .linkTo(WebMvcLinkBuilder
-						.methodOn(UserController.class)
-						.getUserAddress(userId, addressId))
-				        .withSelfRel();
+				.linkTo(WebMvcLinkBuilder.methodOn(UserController.class).getUserAddress(userId, addressId))
+				.withSelfRel();
 		// .slash(userId)
 		// .slash("addresses")
 		// .slash(addressId)
