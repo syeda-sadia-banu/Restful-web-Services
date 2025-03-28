@@ -2,12 +2,16 @@ package com.appsdeveloperblog.ws.ui.controller;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.Link;
+import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
 import org.springframework.http.MediaType;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -139,15 +143,31 @@ public class UserController {
 
 	}
 
-	@GetMapping(path = "/{id}/addresses/{addressId}", produces = { MediaType.APPLICATION_XML_VALUE,
+	@GetMapping(path = "/{userId}/addresses/{addressId}", produces = { MediaType.APPLICATION_XML_VALUE,
 			MediaType.APPLICATION_JSON_VALUE })
-	public AddressesRest getUserAddress(@PathVariable String addressId) {
+	public EntityModel<AddressesRest> getUserAddress(@PathVariable String userId, @PathVariable String addressId) {
 
 		AddressDto addressesDto = addressService.getAddress(addressId);
 
 		ModelMapper modelMapper = new ModelMapper();
-
-		return modelMapper.map(addressesDto, AddressesRest.class);
+		AddressesRest returnValue = modelMapper.map(addressesDto, AddressesRest.class);
+        
+		Link userLink=WebMvcLinkBuilder.linkTo(UserController.class).slash(userId).withRel("user");
+		Link userAddressesLink=WebMvcLinkBuilder.linkTo(UserController.class)
+				                        .slash(userId)
+				                        .slash("addresses")
+				                        .withRel("addresses");
+		Link selfLink=WebMvcLinkBuilder.linkTo(UserController.class)
+				                        .slash(userId)
+				                        .slash("addresses")
+				                        .slash(addressId)
+				                        .withSelfRel();
+		/*
+		 * returnValue.add(userLink); returnValue.add(userAddressesLink);
+		 * returnValue.add(selfLink);
+		 */
+		return  EntityModel.of(returnValue, Arrays.asList(userLink,userAddressesLink,selfLink));
+	
 
 	}
 
