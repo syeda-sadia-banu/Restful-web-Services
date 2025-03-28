@@ -151,23 +151,31 @@ public class UserController {
 
 		ModelMapper modelMapper = new ModelMapper();
 		AddressesRest returnValue = modelMapper.map(addressesDto, AddressesRest.class);
-        
-		Link userLink=WebMvcLinkBuilder.linkTo(UserController.class).slash(userId).withRel("user");
-		Link userAddressesLink=WebMvcLinkBuilder.linkTo(UserController.class)
-				                        .slash(userId)
-				                        .slash("addresses")
-				                        .withRel("addresses");
-		Link selfLink=WebMvcLinkBuilder.linkTo(UserController.class)
-				                        .slash(userId)
-				                        .slash("addresses")
-				                        .slash(addressId)
-				                        .withSelfRel();
+
+		Link userLink = WebMvcLinkBuilder.linkTo(UserController.class).slash(userId).withRel("user");
+		Link userAddressesLink = WebMvcLinkBuilder
+			                          .linkTo(WebMvcLinkBuilder
+			                          .methodOn(UserController.class)
+			                          .getUserAddresses(userId))
+				                     // .slash(userId)
+				                     // .slash("addresses")
+				                       .withRel("addresses");
+		
+		
+		Link selfLink = WebMvcLinkBuilder
+				        .linkTo(WebMvcLinkBuilder
+						.methodOn(UserController.class)
+						.getUserAddress(userId, addressId))
+				        .withSelfRel();
+		// .slash(userId)
+		// .slash("addresses")
+		// .slash(addressId)
+
 		/*
 		 * returnValue.add(userLink); returnValue.add(userAddressesLink);
 		 * returnValue.add(selfLink);
 		 */
-		return  EntityModel.of(returnValue, Arrays.asList(userLink,userAddressesLink,selfLink));
-	
+		return EntityModel.of(returnValue, Arrays.asList(userLink, userAddressesLink, selfLink));
 
 	}
 
